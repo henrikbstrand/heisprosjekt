@@ -26,6 +26,13 @@ int main() {
             elev_set_motor_direction(DIRN_STOP);
             break;
         }
+	
+	int floor = elev_get_floor_sensor_signal();
+	if(floor == 0){elev_set_floor_indicator(0b00);}
+	else if(floor == 1){elev_set_floor_indicator(0b01);}
+	else if(floor == 2){elev_set_floor_indicator(0b10);}
+	else if(floor == 3){elev_set_floor_indicator(0b11);}
+	
     }
 
     return 0;
