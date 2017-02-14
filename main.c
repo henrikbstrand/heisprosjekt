@@ -32,8 +32,8 @@ int main() {
 	else if(floor == 1){elev_set_floor_indicator(0b01);}
 	else if(floor == 2){elev_set_floor_indicator(0b10);}
 	else if(floor == 3){elev_set_floor_indicator(0b11);}
-	
+		
     }
-
+	printf("whateever");
     return 0;
 }
