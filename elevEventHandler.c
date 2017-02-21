@@ -1,7 +1,11 @@
-#include "testEventHandler.h"
-#include "elevStateMachine.h"
+#include "elevEventHandler.h"
+
 
 void checkButtonsForOrder(){
+	if (elev_get_stop_signal()) {
+            elev_set_motor_direction(DIRN_STOP);
+            assert(0);
+        }
 	//floors
 	for (int floorNumb = 0; floorNumb<N_FLOORS; floorNumb++){
 		//buttonType
@@ -23,15 +27,59 @@ void checkButtonsForOrder(){
 
 void elevStartUp(){
 	//start at ground floor
+	initStateMachine();
 	elev_set_motor_direction(DIRN_DOWN);
 	while(!(elev_get_floor_sensor_signal() == 0)){
 	}
 	elev_set_motor_direction(DIRN_STOP);
 }
 
-void stopAtFloor(int floorNumber){
+int checkForTimeout(){
+	// checks the timer for timeout
+	return 1; //return isTimeout?
+}
+
+
+void checkForStart(floorNumber){
+	printf("entering checkForStart\n");
+	while(!checkForTimeout()){
+		//debug
+		printf("stuck in checkForTimeout!\n");
+		checkButtonsForOrder();
+	}
+
+	while(1){
+		printf("stuck in checkForStart!\n");
+		// checking floors above or below depending on motor direction
+		for(int floor = floorNumber; 1 ; floor+= elevStateMachine.direction){
+			printf("got to floor: %i\n",floor);
+			printf("DIR is: %i\n",elevStateMachine.direction);
+			// breaking loop if above N_FLOORS or below ground floor
+			if(floor == N_FLOORS || floor == -1){break;}
+			// if ordered: continue in current direction
+			if(elevStateMachine.orderList[floor].floorOrdered){
+				printf("\n gets to start call\n\n");
+				start(elevStateMachine.direction);
+				return; // return to main loop
+			}
+		}
+	
+		//checking floors in the other direction
+		for(int floor = floorNumber; 1 ; floor+= elevStateMachine.direction * -1){
+			if(floor == N_FLOORS || floor == -1){break;}
+			if(elevStateMachine.orderList[floor].floorOrdered){
+				start(elevStateMachine.direction * -1);
+				return;
+			}
+		}
+		checkButtonsForOrder();
+	}
+}
+
+
+void checkForStop(int floorNumber){
+	printf("entering checkForStop\n");
 	int stopOrder = 0;
-	//could have used --
 	if(elevStateMachine.orderList[floorNumber].inside_command){
 		stopOrder = 1;
 		elevStateMachine.orderList[floorNumber].inside_command = 0;
@@ -48,18 +96,29 @@ void stopAtFloor(int floorNumber){
 	}
 	if (stopOrder){
 		stop(floorNumber);
+		return;
+	}
+
+	// her be problems!
+	/*if(checkIsOrdered()){
+		stop(floorNumber);
+	}*/
+	//temp solution:
+	if(floorNumber == 0 || floorNumber == N_FLOORS-1){
+		stop(floorNumber);
 	}
 }
 
 
 void atFloorActions(){
+	 printf("entering atFloorActions\n");
 	int floorNumber = elev_get_floor_sensor_signal();
 
 	
 	if(floorNumber != -1){
 		elev_set_floor_indicator(floorNumber);
 		
-		stopAtFloor(floorNumber);
+		checkForStop(floorNumber);
 
 	}
 
@@ -67,9 +126,9 @@ void atFloorActions(){
 
 
 	//Skal erstattes med bedre kode
-	if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
+	/*if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
 	        elev_set_motor_direction(DIRN_DOWN);
 	} else if (elev_get_floor_sensor_signal() == 0) {
 	        elev_set_motor_direction(DIRN_UP);
-	    }
+	    }*/
 }

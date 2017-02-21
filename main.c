@@ -1,6 +1,5 @@
 #include "elev.h"
-#include "testEventHandler.h"
-#include "elevStateMachine.h"
+#include "elevEventHandler.h"
 #include <stdio.h>
 
 
@@ -16,7 +15,7 @@ int main() {
 	//elev_set_motor_direction(DIRN_UP);
 
 	elevStartUp();
-
+    printf("entering main loop\n");
     while (1) {
         // Change direction when we reach top/bottom floor
         /*

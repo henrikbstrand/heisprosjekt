@@ -1,7 +1,12 @@
-#include "elev.h"
+#pragma once
+#include "elevStateMachine.h"
+#include <stdio.h>
+#include <assert.h>
 
 
 void checkButtonsForOrder();
 void elevStartUp();
 void atFloorActions();
-void stopAtFloor(int floorNumber);
+void checkForStop(int floorNumber);
+void checkForStart(int floorNumber);
+int checkForTimeout();

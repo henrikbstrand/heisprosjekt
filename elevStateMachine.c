@@ -3,6 +3,7 @@
 
 
 
+
 void setFloorOrder(int floorNumber, elev_button_type_t buttonType){
 	switch(buttonType){
 		case(BUTTON_CALL_UP):
@@ -29,13 +30,37 @@ void initStateMachine(){
 		elevStateMachine.orderList[floorNumber].inside_command = 0;
 		elevStateMachine.orderList[floorNumber].floorOrdered = 0;
 	}
+	// set direction to down
+	elevStateMachine.direction = DIRN_DOWN;
 }
 
 void stop(int floorNumber){
+	printf("entering stop\n");
 	elev_set_motor_direction(DIRN_STOP);
 	elev_set_door_open_lamp(1);
 	elevStateMachine.orderList[floorNumber].floorOrdered = 0;
 	for (elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
+		if(floorNumber == N_FLOORS-1 && bType == 0){
+				continue; //skipping up command at upper floor
+			}
+			else if(floorNumber == 0 && bType == 1){
+				continue; //skipping down command at ground floor
+			}
 		elev_set_button_lamp(bType, floorNumber, 0);
 	}
+	checkForStart(floorNumber);
+}
+
+void start(elev_motor_direction_t direction){
+	printf("entering start\n");
+	elev_set_motor_direction(direction);
+	elevStateMachine.direction = direction;
+}
+int checkIsOrdered(){
+	int isOrdered = 0;
+	for(int floor = 0; floor < N_FLOORS; floor++){
+		isOrdered += elevStateMachine.orderList[floor].floorOrdered;
+	}
+
+	return isOrdered;
 }
