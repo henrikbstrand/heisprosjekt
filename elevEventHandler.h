@@ -9,4 +9,3 @@ void elevStartUp();
 void atFloorActions();
 void checkForStop(int floorNumber);
 void checkForStart(int floorNumber);
-int checkForTimeout();

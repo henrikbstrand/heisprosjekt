@@ -6,9 +6,9 @@ void checkButtonsForOrder(){
             elev_set_motor_direction(DIRN_STOP);
             assert(0);
         }
-	//floors
+	//itterating over floors
 	for (int floorNumb = 0; floorNumb<N_FLOORS; floorNumb++){
-		//buttonType
+		//itterate over types
 		for(elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
 			if(floorNumb == N_FLOORS-1 && bType == 0){
 				continue; //skipping up command at upper floor
@@ -34,19 +34,12 @@ void elevStartUp(){
 	elev_set_motor_direction(DIRN_STOP);
 }
 
-int checkForTimeout(){
-	// checks the timer for timeout
-	return 1; //return isTimeout?
-}
+
 
 
 void checkForStart(floorNumber){
 	printf("entering checkForStart\n");
-	while(!checkForTimeout()){
-		//debug
-		printf("stuck in checkForTimeout!\n");
-		checkButtonsForOrder();
-	}
+
 
 	while(1){
 		printf("stuck in checkForStart!\n");
@@ -100,17 +93,18 @@ void checkForStop(int floorNumber){
 	}
 
 	// her be problems!
-	/*if(checkIsOrdered()){
-		stop(floorNumber);
-	}*/
-	//temp solution:
-	if(floorNumber == 0 || floorNumber == N_FLOORS-1){
+	if(!checkIsOrderedInCurrentDir(floorNumber)){
 		stop(floorNumber);
 	}
+	//temp solution:
+	//if((floorNumber == 0 && elevStateMachine.direction == DIRN_DOWN)|| (floorNumber == N_FLOORS-1 && elevStateMachine.direction == DIRN_UP)){
+	//	stop(floorNumber);
+	//}
 }
 
 
 void atFloorActions(){
+
 	 printf("entering atFloorActions\n");
 	int floorNumber = elev_get_floor_sensor_signal();
 
@@ -119,7 +113,6 @@ void atFloorActions(){
 		elev_set_floor_indicator(floorNumber);
 		
 		checkForStop(floorNumber);
-
 	}
 
 

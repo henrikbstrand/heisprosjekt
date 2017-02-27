@@ -1,6 +1,7 @@
 #pragma once
 #include "elev.h"
 #include "elevEventHandler.h"
+#include "timer.h"
 #include <stdio.h>
 
 struct FloorOrder {
@@ -21,4 +22,4 @@ void setFloorOrder(int floor, elev_button_type_t buttonType);
 void initStateMachine();
 void stop(int floorNumber);
 void start(elev_motor_direction_t direction);
-int checkIsOrdered();
+int checkIsOrderedInCurrentDir(int floorNumber);
