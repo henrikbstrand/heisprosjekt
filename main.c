@@ -15,7 +15,7 @@ int main() {
 	//elev_set_motor_direction(DIRN_UP);
 
 	elevStartUp();
-    printf("entering main loop\n");
+    //printf("entering main loop\n");
     while (1) {
         // Change direction when we reach top/bottom floor
         /*
@@ -27,10 +27,10 @@ int main() {
 		*/
 
         // Stop elevator and exit program if the stop button is pressed
-        if (elev_get_stop_signal()) {
+        /*if (elev_get_stop_signal()) {
             elev_set_motor_direction(DIRN_STOP);
             break;
-        }
+        }*/
         //check for input from buttons
         checkButtonsForOrder();
         //standard actions at each flooor

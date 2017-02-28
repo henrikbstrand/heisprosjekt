@@ -3,9 +3,9 @@
 
 void checkButtonsForOrder(){
 	if (elev_get_stop_signal()) {
-            elev_set_motor_direction(DIRN_STOP);
-            assert(0);
-        }
+		stopButtonPressed();
+    }
+
 	//itterating over floors
 	for (int floorNumb = 0; floorNumb<N_FLOORS; floorNumb++){
 		//itterate over types
@@ -29,7 +29,7 @@ void elevStartUp(){
 	//start at ground floor
 	initStateMachine();
 	elev_set_motor_direction(DIRN_DOWN);
-	while(!(elev_get_floor_sensor_signal() == 0)){
+	while(!(elev_get_floor_sensor_signal() != -1)){
 	}
 	elev_set_motor_direction(DIRN_STOP);
 }
@@ -38,20 +38,22 @@ void elevStartUp(){
 
 
 void checkForStart(floorNumber){
-	printf("entering checkForStart\n");
+	//printf("entering checkForStart\n");
 
 
 	while(1){
-		printf("stuck in checkForStart!\n");
+		//printf("stuck in checkForStart!\n");
 		// checking floors above or below depending on motor direction
-		for(int floor = floorNumber; 1 ; floor+= elevStateMachine.direction){
-			printf("got to floor: %i\n",floor);
-			printf("DIR is: %i\n",elevStateMachine.direction);
+		// + skipping current floor
+		//printf("floorNumber: %i\n",floorNumber);
+		for(int floor = floorNumber + elevStateMachine.direction; 1 ; floor+= elevStateMachine.direction){
+			//printf("got to floor: %i\n",floor);
+			//printf("DIR is: %i\n",elevStateMachine.direction);
 			// breaking loop if above N_FLOORS or below ground floor
 			if(floor == N_FLOORS || floor == -1){break;}
 			// if ordered: continue in current direction
 			if(elevStateMachine.orderList[floor].floorOrdered){
-				printf("\n gets to start call\n\n");
+				//printf("\n gets to start call\n\n");
 				start(elevStateMachine.direction);
 				return; // return to main loop
 			}
@@ -71,19 +73,16 @@ void checkForStart(floorNumber){
 
 
 void checkForStop(int floorNumber){
-	printf("entering checkForStop\n");
+	//printf("entering checkForStop\n");
 	int stopOrder = 0;
 	if(elevStateMachine.orderList[floorNumber].inside_command){
-		stopOrder = 1;
-		
+		stopOrder = 1;	
 	}
 	else if(elevStateMachine.orderList[floorNumber].dir_up && elevStateMachine.direction == DIRN_UP){
 		stopOrder = 1;
-		
 	}
 	else if(elevStateMachine.orderList[floorNumber].dir_down && elevStateMachine.direction == DIRN_DOWN){
 		stopOrder = 1;
-		
 	}
 	else if(!checkIsOrderedInCurrentDir(floorNumber)){
 		stopOrder = 1;
@@ -91,34 +90,18 @@ void checkForStop(int floorNumber){
 
 	if (stopOrder){
 		stop(floorNumber);
-		elevStateMachine.orderList[floorNumber].inside_command = 0;
-		elevStateMachine.orderList[floorNumber].dir_up = 0;
-		elevStateMachine.orderList[floorNumber].dir_down = 0;
-		return;
 	}
 
 }
 
 
 void atFloorActions(){
-
-	 printf("entering atFloorActions\n");
+	//printf("entering atFloorActions\n");
 	int floorNumber = elev_get_floor_sensor_signal();
 
-	
 	if(floorNumber != -1){
 		elev_set_floor_indicator(floorNumber);
-		
+		elevStateMachine.lastFloor = floorNumber;
 		checkForStop(floorNumber);
 	}
-
-
-
-
-	//Skal erstattes med bedre kode
-	/*if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
-	        elev_set_motor_direction(DIRN_DOWN);
-	} else if (elev_get_floor_sensor_signal() == 0) {
-	        elev_set_motor_direction(DIRN_UP);
-	    }*/
 }

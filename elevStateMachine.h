@@ -14,6 +14,7 @@ struct FloorOrder {
 struct StateMachine {
 	struct FloorOrder orderList[N_FLOORS];
 	elev_motor_direction_t direction;
+	int lastFloor;
 };
 struct StateMachine elevStateMachine;
 
@@ -23,3 +24,4 @@ void initStateMachine();
 void stop(int floorNumber);
 void start(elev_motor_direction_t direction);
 int checkIsOrderedInCurrentDir(int floorNumber);
+void stopButtonPressed();
