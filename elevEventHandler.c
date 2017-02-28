@@ -75,31 +75,28 @@ void checkForStop(int floorNumber){
 	int stopOrder = 0;
 	if(elevStateMachine.orderList[floorNumber].inside_command){
 		stopOrder = 1;
-		elevStateMachine.orderList[floorNumber].inside_command = 0;
-		elevStateMachine.orderList[floorNumber].dir_up = 0;
-		elevStateMachine.orderList[floorNumber].dir_down = 0;
+		
 	}
 	else if(elevStateMachine.orderList[floorNumber].dir_up && elevStateMachine.direction == DIRN_UP){
 		stopOrder = 1;
-		elevStateMachine.orderList[floorNumber].dir_up = 0;
+		
 	}
 	else if(elevStateMachine.orderList[floorNumber].dir_down && elevStateMachine.direction == DIRN_DOWN){
 		stopOrder = 1;
-		elevStateMachine.orderList[floorNumber].dir_down = 0;
+		
 	}
+	else if(!checkIsOrderedInCurrentDir(floorNumber)){
+		stopOrder = 1;
+	}
+
 	if (stopOrder){
 		stop(floorNumber);
+		elevStateMachine.orderList[floorNumber].inside_command = 0;
+		elevStateMachine.orderList[floorNumber].dir_up = 0;
+		elevStateMachine.orderList[floorNumber].dir_down = 0;
 		return;
 	}
 
-	// her be problems!
-	if(!checkIsOrderedInCurrentDir(floorNumber)){
-		stop(floorNumber);
-	}
-	//temp solution:
-	//if((floorNumber == 0 && elevStateMachine.direction == DIRN_DOWN)|| (floorNumber == N_FLOORS-1 && elevStateMachine.direction == DIRN_UP)){
-	//	stop(floorNumber);
-	//}
 }
 
 

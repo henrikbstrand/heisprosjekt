@@ -7,7 +7,7 @@ int checkForTimeout(){
 	endTime = clock();
 	printf("time: %f", (double)((endTime-startTime)/CLOCKS_PER_SEC));
 	//return 1 if timer reach 3 seconds
-	return ((double)((endTime-startTime)/CLOCKS_PER_SEC)>=2.0);
+	return ((double)((endTime-startTime)/CLOCKS_PER_SEC)>=1.0);
 }
 
 void startTimer(){
