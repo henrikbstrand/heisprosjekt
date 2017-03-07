@@ -1,3 +1,10 @@
+////////////////////////////////////
+//TTK4235 Tilpassede datasystemer //
+//Heisprosjekt                    //
+//Henrik Bjering Strand           //
+//Håkon Yssen Rørstad             //
+////////////////////////////////////
+
 #include "elevStateMachine.h"
 
 
@@ -20,6 +27,8 @@ void setFloorOrder(int floorNumber, elev_button_type_t buttonType){
 
 }
 
+
+
 void initStateMachine(){
 	//Set all orders to 0
 	for(int floorNumber = 0; floorNumber < N_FLOORS; floorNumber++){
@@ -37,54 +46,54 @@ void initStateMachine(){
 
 
 void stop(int floorNumber){
-	//printf("entering stop\n");
 	elev_set_motor_direction(DIRN_STOP);
 	elev_set_door_open_lamp(1);
 	startTimer();
 
-	//Resets order kommand 
+	//Resets all order commands at current floor 
 	elevStateMachine.orderList[floorNumber].floorOrdered = 0;
 	elevStateMachine.orderList[floorNumber].inside_command = 0;
 	elevStateMachine.orderList[floorNumber].dir_up = 0;
 	elevStateMachine.orderList[floorNumber].dir_down = 0;
-	//Turns off lights in all order buttons
+	
+	//Turns light off in all buttons
 	for (elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
-		if(floorNumber == N_FLOORS-1 && bType == 0){
-				continue; //skipping up command at upper floor
+		//skipping up command at upper floor
+		if(floorNumber == N_FLOORS-1 && bType == BUTTON_CALL_UP){
+				continue;
 			}
-		else if(floorNumber == 0 && bType == 1){
-				continue; //skipping down command at ground floor
+		//skipping down command at ground floor
+		else if(floorNumber == 0 && bType == BUTTON_CALL_DOWN){
+				continue;
 			}
 		elev_set_button_lamp(bType, floorNumber, 0);
 	}
 
 	//check buttons for orders while timer counts down
 	while(!checkForTimeout()){
-		//debug
-	//	printf("stuck in checkForTimeout!\n");
-
-
 		checkButtonsForOrder();
 	}
+	//Close door when timer is done
 	elev_set_door_open_lamp(0);
+
 	checkForStart(floorNumber);
 }
 
 
 
-
-
 void start(elev_motor_direction_t direction){
-	//printf("entering start\n");
 	elev_set_motor_direction(direction);
 	elevStateMachine.direction = direction;
 }
 
 
-int checkIsOrderedInCurrentDir(int floorNumber){
+
+int checkForOrderInCurrentDir(int floorNumber){
 	int isOrdered = 0;
+	//skip current floor
 	floorNumber += elevStateMachine.direction;
-	for(int floor = floorNumber; 1 ; floor+= elevStateMachine.direction){
+	
+	for(int floor = floorNumber; 1 ; floor += elevStateMachine.direction){
 		// breaking loop if above N_FLOORS or below ground floor
 		if(floor == N_FLOORS || floor == -1){break;}
 		
@@ -92,6 +101,8 @@ int checkIsOrderedInCurrentDir(int floorNumber){
 	}
 	return isOrdered;
 }
+
+
 
 
 void stopButtonPressed(){
@@ -105,12 +116,15 @@ void stopButtonPressed(){
 		elevStateMachine.orderList[floorNumber].dir_up = 0;
 		elevStateMachine.orderList[floorNumber].dir_down = 0;
 		
+		//Turns off light in all buttons
 		for (elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
-		if(floorNumber == N_FLOORS-1 && bType == 0){
-				continue; //skipping up command at upper floor
+		//skipping up command at upper floor
+		if(floorNumber == N_FLOORS-1 && bType == BUTTON_CALL_UP){
+				continue; 
 			}
-		else if(floorNumber == 0 && bType == 1){
-				continue; //skipping down command at ground floor
+		//skipping down command at ground floor
+		else if(floorNumber == 0 && bType == BUTTON_CALL_DOWN){
+				continue; 
 			}
 		elev_set_button_lamp(bType, floorNumber, 0);
 		}
@@ -118,6 +132,7 @@ void stopButtonPressed(){
 
 	int floorNumber = elev_get_floor_sensor_signal();
 	
+	//Open door if elevator is at a floor
 	if(floorNumber != -1){
 		elev_set_door_open_lamp(1);
 	}
@@ -125,11 +140,12 @@ void stopButtonPressed(){
 
 
 	while(elev_get_stop_signal()){
-		//Reads no order while pressed
+		//Reads no orders while pressed
 	}
 	
 	elev_set_stop_lamp(0);
 	
+	//If at a floor, stop as normal
 	if(floorNumber != -1){
 		stop(floorNumber);
 	}

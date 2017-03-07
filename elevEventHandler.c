@@ -1,4 +1,26 @@
+////////////////////////////////////
+//TTK4235 Tilpassede datasystemer //
+//Heisprosjekt                    //
+//Henrik Bjering Strand           //
+//Håkon Yssen Rørstad             //
+////////////////////////////////////
+
 #include "elevEventHandler.h"
+
+
+
+void elevStartUp(){
+	//start at the closest floor underneath
+	initStateMachine();
+	elev_set_motor_direction(DIRN_DOWN);
+	
+	while(!(elev_get_floor_sensor_signal() != -1)){
+		//stuck here while not at a floor
+	}
+
+	elev_set_motor_direction(DIRN_STOP);
+}
+
 
 
 void checkButtonsForOrder(){
@@ -8,15 +30,17 @@ void checkButtonsForOrder(){
 
 	//itterating over floors
 	for (int floorNumb = 0; floorNumb<N_FLOORS; floorNumb++){
-		//itterate over types
+		//itterate over different buttons at floor
 		for(elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
-			if(floorNumb == N_FLOORS-1 && bType == 0){
-				continue; //skipping up command at upper floor
+			//skipping up command at upper floor
+			if(floorNumb == N_FLOORS-1 && bType == BUTTON_CALL_UP){
+				continue; 
 			}
-			else if(floorNumb == 0 && bType == 1){
-				continue; //skipping down command at ground floor
+			//skipping down command at ground floor
+			else if(floorNumb == 0 && bType == BUTTON_CALL_DOWN){
+				continue; 
 			}
-
+			
 			if(elev_get_button_signal(bType,floorNumb)){
 				elev_set_button_lamp(bType,floorNumb,1);
 				setFloorOrder(floorNumb, bType);
@@ -25,42 +49,31 @@ void checkButtonsForOrder(){
 	}
 }
 
-void elevStartUp(){
-	//start at ground floor
-	initStateMachine();
-	elev_set_motor_direction(DIRN_DOWN);
-	while(!(elev_get_floor_sensor_signal() != -1)){
-	}
-	elev_set_motor_direction(DIRN_STOP);
-}
+
 
 
 
 
 void checkForStart(floorNumber){
-	//printf("entering checkForStart\n");
-
-
 	while(1){
-		//printf("stuck in checkForStart!\n");
 		// checking floors above or below depending on motor direction
 		// + skipping current floor
-		//printf("floorNumber: %i\n",floorNumber);
-		for(int floor = floorNumber + elevStateMachine.direction; 1 ; floor+= elevStateMachine.direction){
-			//printf("got to floor: %i\n",floor);
-			//printf("DIR is: %i\n",elevStateMachine.direction);
+		
+		for(int floor = floorNumber + elevStateMachine.direction; 1 ; floor += elevStateMachine.direction){
+			
 			// breaking loop if above N_FLOORS or below ground floor
 			if(floor == N_FLOORS || floor == -1){break;}
+
 			// if ordered: continue in current direction
 			if(elevStateMachine.orderList[floor].floorOrdered){
-				//printf("\n gets to start call\n\n");
+				
 				start(elevStateMachine.direction);
 				return; // return to main loop
 			}
 		}
 	
 		//checking floors in the other direction
-		for(int floor = floorNumber; 1 ; floor+= elevStateMachine.direction * -1){
+		for(int floor = floorNumber; 1 ; floor += elevStateMachine.direction * -1 ){
 			if(floor == N_FLOORS || floor == -1){break;}
 			if(elevStateMachine.orderList[floor].floorOrdered){
 				start(elevStateMachine.direction * -1);
@@ -73,8 +86,9 @@ void checkForStart(floorNumber){
 
 
 void checkForStop(int floorNumber){
-	//printf("entering checkForStop\n");
 	int stopOrder = 0;
+
+	//Stop if command is from the inside or in the same direction as elevator
 	if(elevStateMachine.orderList[floorNumber].inside_command){
 		stopOrder = 1;	
 	}
@@ -84,7 +98,8 @@ void checkForStop(int floorNumber){
 	else if(elevStateMachine.orderList[floorNumber].dir_down && elevStateMachine.direction == DIRN_DOWN){
 		stopOrder = 1;
 	}
-	else if(!checkIsOrderedInCurrentDir(floorNumber)){
+	//stop if no other orders in the same direction
+	else if(!checkForOrderInCurrentDir(floorNumber)){
 		stopOrder = 1;
 	}
 
@@ -96,9 +111,8 @@ void checkForStop(int floorNumber){
 
 
 void atFloorActions(){
-	//printf("entering atFloorActions\n");
 	int floorNumber = elev_get_floor_sensor_signal();
-
+	
 	if(floorNumber != -1){
 		elev_set_floor_indicator(floorNumber);
 		elevStateMachine.lastFloor = floorNumber;
