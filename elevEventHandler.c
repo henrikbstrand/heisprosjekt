@@ -1,24 +1,19 @@
-////////////////////////////////////
-//TTK4235 Tilpassede datasystemer //
-//Heisprosjekt                    //
-//Henrik Bjering Strand           //
-//Håkon Yssen Rørstad             //
-////////////////////////////////////
-
 #include "elevEventHandler.h"
 
 
 
 void elevStartUp(){
 	//start at the closest floor underneath
-	initStateMachine();
 	elev_set_motor_direction(DIRN_DOWN);
 	
-	while(!(elev_get_floor_sensor_signal() != -1)){
+	while(elev_get_floor_sensor_signal() == -1){
 		//stuck here while not at a floor
 	}
 
 	elev_set_motor_direction(DIRN_STOP);
+	
+	//Initiallize state machine when a floor is reached
+	initStateMachine();
 }
 
 
@@ -32,11 +27,11 @@ void checkButtonsForOrder(){
 	for (int floorNumb = 0; floorNumb<N_FLOORS; floorNumb++){
 		//itterate over different buttons at floor
 		for(elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
-			//skipping up command at upper floor
+			//skipping up-command at upper floor
 			if(floorNumb == N_FLOORS-1 && bType == BUTTON_CALL_UP){
 				continue; 
 			}
-			//skipping down command at ground floor
+			//skipping down-command at ground floor
 			else if(floorNumb == 0 && bType == BUTTON_CALL_DOWN){
 				continue; 
 			}
@@ -55,33 +50,28 @@ void checkButtonsForOrder(){
 
 
 void checkForStart(floorNumber){
-	while(1){
-		// checking floors above or below depending on motor direction
-		// + skipping current floor
-		
-		for(int floor = floorNumber + elevStateMachine.direction; 1 ; floor += elevStateMachine.direction){
-			
-			// breaking loop if above N_FLOORS or below ground floor
-			if(floor == N_FLOORS || floor == -1){break;}
+	//checking floors for orders in elevators direction
+	// + ignoring current floor
+	for(int floor = floorNumber + elevStateMachine.direction; 1 ; floor += elevStateMachine.direction){
+		// breaking loop if above N_FLOORS or below ground floor
+		if(floor == N_FLOORS || floor == -1){break;}
 
-			// if ordered: continue in current direction
-			if(elevStateMachine.orderList[floor].floorOrdered){
-				
-				start(elevStateMachine.direction);
-				return; // return to main loop
-			}
+		// if ordered: continue in current direction
+		if(elevStateMachine.orderList[floor].floorOrdered){
+			start(elevStateMachine.direction);
+			return; // return to main loop
 		}
-	
-		//checking floors in the other direction
-		for(int floor = floorNumber; 1 ; floor += elevStateMachine.direction * -1 ){
-			if(floor == N_FLOORS || floor == -1){break;}
-			if(elevStateMachine.orderList[floor].floorOrdered){
-				start(elevStateMachine.direction * -1);
-				return;
-			}
-		}
-		checkButtonsForOrder();
 	}
+
+	//checking floors in the other direction
+	for(int floor = floorNumber; 1 ; floor += elevStateMachine.direction * -1 ){
+		if(floor == N_FLOORS || floor == -1){break;}
+		if(elevStateMachine.orderList[floor].floorOrdered){
+			start(elevStateMachine.direction * -1);
+			
+		}
+	}
+	//return to main-loop		
 }
 
 

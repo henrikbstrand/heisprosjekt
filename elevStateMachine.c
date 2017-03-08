@@ -1,10 +1,3 @@
-////////////////////////////////////
-//TTK4235 Tilpassede datasystemer //
-//Heisprosjekt                    //
-//Henrik Bjering Strand           //
-//Håkon Yssen Rørstad             //
-////////////////////////////////////
-
 #include "elevStateMachine.h"
 
 
@@ -39,8 +32,10 @@ void initStateMachine(){
 	}
 	// set direction to down
 	elevStateMachine.direction = DIRN_DOWN;
-	// set last floor to 0
-	elevStateMachine.lastFloor = 0;
+	// set last floor to 
+	elevStateMachine.lastFloor = elev_get_floor_sensor_signal();
+	//stopped is initially true
+	elevStateMachine.stopped = 1;
 }
 
 
@@ -58,14 +53,15 @@ void stop(int floorNumber){
 	
 	//Turns light off in all buttons
 	for (elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
-		//skipping up command at upper floor
+		//skipping up-command at upper floor
 		if(floorNumber == N_FLOORS-1 && bType == BUTTON_CALL_UP){
 				continue;
 			}
-		//skipping down command at ground floor
+		//skipping down-command at ground floor
 		else if(floorNumber == 0 && bType == BUTTON_CALL_DOWN){
 				continue;
 			}
+
 		elev_set_button_lamp(bType, floorNumber, 0);
 	}
 
@@ -76,14 +72,22 @@ void stop(int floorNumber){
 	//Close door when timer is done
 	elev_set_door_open_lamp(0);
 
-	checkForStart(floorNumber);
+	//checkForStart(floorNumber);
+	elevStateMachine.stopped = 1;
+
+	//returning to main-loop
 }
 
 
 
 void start(elev_motor_direction_t direction){
 	elev_set_motor_direction(direction);
+	
 	elevStateMachine.direction = direction;
+
+	elevStateMachine.stopped = 0;
+
+	//returning to main loop
 }
 
 
@@ -118,11 +122,11 @@ void stopButtonPressed(){
 		
 		//Turns off light in all buttons
 		for (elev_button_type_t bType = BUTTON_CALL_UP; bType<BUTTON_COMMAND+1; bType++){
-		//skipping up command at upper floor
+		//skipping up-command at upper floor
 		if(floorNumber == N_FLOORS-1 && bType == BUTTON_CALL_UP){
 				continue; 
 			}
-		//skipping down command at ground floor
+		//skipping down-command at ground floor
 		else if(floorNumber == 0 && bType == BUTTON_CALL_DOWN){
 				continue; 
 			}
@@ -137,8 +141,6 @@ void stopButtonPressed(){
 		elev_set_door_open_lamp(1);
 	}
 
-
-
 	while(elev_get_stop_signal()){
 		//Reads no orders while pressed
 	}
@@ -150,7 +152,8 @@ void stopButtonPressed(){
 		stop(floorNumber);
 	}
 	else{
-		//Passing last floor as argument if not at floor
-		checkForStart(elevStateMachine.lastFloor);
+		//change state to stopped
+		elevStateMachine.stopped = 1;
 	}
+	//return to checkButtonsForOrder()
 }

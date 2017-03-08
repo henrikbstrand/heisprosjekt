@@ -1,10 +1,3 @@
-////////////////////////////////////
-//TTK4235 Tilpassede datasystemer //
-//Heisprosjekt                    //
-//Henrik Bjering Strand           //
-//Håkon Yssen Rørstad             //
-////////////////////////////////////
-
 #include "elev.h"
 #include "elevEventHandler.h"
 #include <stdio.h>
@@ -19,13 +12,28 @@ int main() {
 
     printf("Press STOP button to stop elevator.\n");
 
+    //Startup:
+    // *go to defined floor
+    // *initiallize state machine
 	elevStartUp();
-    
+
+	//main-loop
     while (1) {
         //check for input from buttons
         checkButtonsForOrder();
-        //standard actions at each flooor
-        atFloorActions();
+
+        if(elevStateMachine.stopped){
+        	//check for orders
+        	checkForStart(elevStateMachine.lastFloor);
+
+        }
+        else{
+        	//standard actions at each floor:
+        	// *turn on floor indicators
+        	// *stop if ordered
+        	atFloorActions();	
+        }
+        
     }
 
     return 0;

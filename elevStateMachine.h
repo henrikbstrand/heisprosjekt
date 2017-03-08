@@ -1,10 +1,3 @@
-////////////////////////////////////
-//TTK4235 Tilpassede datasystemer //
-//Heisprosjekt                    //
-//Henrik Bjering Strand           //
-//Håkon Yssen Rørstad             //
-////////////////////////////////////
-
 #pragma once
 #include "elev.h"
 #include "elevEventHandler.h"
@@ -23,6 +16,7 @@ struct StateMachine {
 	struct FloorOrder orderList[N_FLOORS];
 	elev_motor_direction_t direction;
 	int lastFloor;
+	int stopped;
 };
 
 //Initialize global struct for the statemachine
