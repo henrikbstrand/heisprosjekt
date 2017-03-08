@@ -72,7 +72,6 @@ void stop(int floorNumber){
 	//Close door when timer is done
 	elev_set_door_open_lamp(0);
 
-	//checkForStart(floorNumber);
 	elevStateMachine.stopped = 1;
 
 	//returning to main-loop
