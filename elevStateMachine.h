@@ -13,6 +13,7 @@ struct FloorOrder {
 
 
 struct StateMachine {
+	//list containg each floor and their order-status
 	struct FloorOrder orderList[N_FLOORS];
 	elev_motor_direction_t direction;
 	int lastFloor;

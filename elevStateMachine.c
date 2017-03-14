@@ -1,6 +1,24 @@
 #include "elevStateMachine.h"
 
 
+void initStateMachine(){
+	//Set all orders to 0
+	for(int floorNumber = 0; floorNumber < N_FLOORS; floorNumber++){
+		elevStateMachine.orderList[floorNumber].dir_up = 0;
+		elevStateMachine.orderList[floorNumber].dir_down = 0;
+		elevStateMachine.orderList[floorNumber].inside_command = 0;
+		elevStateMachine.orderList[floorNumber].floorOrdered = 0;
+	}
+	// set direction to down
+	elevStateMachine.direction = DIRN_DOWN;
+	// set last floor 
+	elevStateMachine.lastFloor = elev_get_floor_sensor_signal();
+	//stopped is initially true
+	elevStateMachine.stopped = 1;
+}
+
+
+
 
 void setFloorOrder(int floorNumber, elev_button_type_t buttonType){
 	switch(buttonType){
@@ -17,25 +35,6 @@ void setFloorOrder(int floorNumber, elev_button_type_t buttonType){
 		break;
 	}
 	elevStateMachine.orderList[floorNumber].floorOrdered = 1;
-
-}
-
-
-
-void initStateMachine(){
-	//Set all orders to 0
-	for(int floorNumber = 0; floorNumber < N_FLOORS; floorNumber++){
-		elevStateMachine.orderList[floorNumber].dir_up = 0;
-		elevStateMachine.orderList[floorNumber].dir_down = 0;
-		elevStateMachine.orderList[floorNumber].inside_command = 0;
-		elevStateMachine.orderList[floorNumber].floorOrdered = 0;
-	}
-	// set direction to down
-	elevStateMachine.direction = DIRN_DOWN;
-	// set last floor to 
-	elevStateMachine.lastFloor = elev_get_floor_sensor_signal();
-	//stopped is initially true
-	elevStateMachine.stopped = 1;
 }
 
 

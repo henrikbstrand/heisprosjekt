@@ -47,8 +47,6 @@ void checkButtonsForOrder(){
 
 
 
-
-
 void checkForStart(floorNumber){
 	//checking floors for orders in elevators direction
 	// + ignoring current floor
